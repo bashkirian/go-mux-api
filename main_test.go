@@ -1,20 +1,17 @@
-// main_test.go
-
 package main_test
 
 import (
+	"log"
 	"os"
 	"testing"
-    "log"
 
-    "net/http"
-    "net/http/httptest"
-    "strconv"
-    "encoding/json"
-    "bytes"
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
 
-    "github.com/TomFern/go-mux-api"
-
+	"github.com/TomFern/go-mux-api"
 )
 
 var a main.App
@@ -42,20 +39,55 @@ func ensureTableExists() {
 }
 
 func clearTable() {
-	a.DB.Exec("DELETE FROM products")
+	a.DB.Exec("DELETE FROM balance")
 	a.DB.Exec("ALTER SEQUENCE products_id_seq RESTART WITH 1")
 }
 
-const tableCreationQuery = `CREATE TABLE IF NOT EXISTS products
-(
-    id SERIAL,
-    name TEXT NOT NULL,
-    price NUMERIC(10,2) NOT NULL DEFAULT 0.00,
-    CONSTRAINT products_pkey PRIMARY KEY (id)
-)`
+const tableCreationQuery = `CREATE TABLE "balance" (
+	"user_id" serial NOT NULL,
+	"ruble_balance" FLOAT NOT NULL,
+	CONSTRAINT "balance_pk" PRIMARY KEY ("user_id")
+) WITH (
+  OIDS=FALSE
+);
 
+CREATE TABLE "transactions" (
+	"transaction_id" serial NOT NULL,
+	"date" TIME NOT NULL,
+	"amount" FLOAT NOT NULL,
+	"user_id" integer NOT NULL,
+	"service_id" integer NOT NULL,
+	CONSTRAINT "transactions_pk" PRIMARY KEY ("transaction_id")
+) WITH (
+  OIDS=FALSE
+);
 
-// tom: next functions added later, these require more modules: net/http net/http/httptest
+CREATE TABLE "services" (
+	"service_id" serial NOT NULL,
+	"service_name" VARCHAR(255) NOT NULL,
+	CONSTRAINT "services_pk" PRIMARY KEY ("service_id")
+) WITH (
+  OIDS=FALSE
+);
+
+CREATE TABLE "reservations" (
+	"reservation_id" serial NOT NULL,
+	"user_id" integer NOT NULL,
+	"service_id" integer NOT NULL,
+	"cost" integer NOT NULL,
+	"reservation_time" TIMESTAMP NOT NULL,
+	CONSTRAINT "reservations_pk" PRIMARY KEY ("reservation_id")
+) WITH (
+  OIDS=FALSE
+);
+
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_fk0" FOREIGN KEY ("user_id") REFERENCES "balance"("user_id");
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_fk1" FOREIGN KEY ("service_id") REFERENCES "services"("service_id");
+
+ALTER TABLE "reservations" ADD CONSTRAINT "reservations_fk0" FOREIGN KEY ("user_id") REFERENCES "balance"("user_id");
+ALTER TABLE "reservations" ADD CONSTRAINT "reservations_fk1" FOREIGN KEY ("service_id") REFERENCES "services"("service_id");
+`
+
 func TestEmptyTable(t *testing.T) {
 	clearTable()
 
@@ -97,14 +129,13 @@ func TestGetNonExistentProduct(t *testing.T) {
 	}
 }
 
-// tom: rewritten function
 func TestCreateProduct(t *testing.T) {
 
 	clearTable()
 
-    var jsonStr = []byte(`{"name":"test product", "price": 11.22}`)
-    req, _ := http.NewRequest("POST", "/product", bytes.NewBuffer(jsonStr))
-    req.Header.Set("Content-Type", "application/json")
+	var jsonStr = []byte(`{"name":"test product", "price": 11.22}`)
+	req, _ := http.NewRequest("POST", "/product", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -120,13 +151,10 @@ func TestCreateProduct(t *testing.T) {
 		t.Errorf("Expected product price to be '11.22'. Got '%v'", m["price"])
 	}
 
-	// the id is compared to 1.0 because JSON unmarshaling converts numbers to
-	// floats, when the target is a map[string]interface{}
 	if m["id"] != 1.0 {
 		t.Errorf("Expected product ID to be '1'. Got '%v'", m["id"])
 	}
 }
-
 
 func TestGetProduct(t *testing.T) {
 	clearTable()
@@ -158,11 +186,10 @@ func TestUpdateProduct(t *testing.T) {
 	var originalProduct map[string]interface{}
 	json.Unmarshal(response.Body.Bytes(), &originalProduct)
 
-    var jsonStr = []byte(`{"name":"test product - updated name", "price": 11.22}`)
-    req, _ = http.NewRequest("PUT", "/product/1", bytes.NewBuffer(jsonStr))
-    req.Header.Set("Content-Type", "application/json")
+	var jsonStr = []byte(`{"name":"test product - updated name", "price": 11.22}`)
+	req, _ = http.NewRequest("PUT", "/product/1", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
 
-	// req, _ = http.NewRequest("PUT", "/product/1", bytes.NewBuffer(payload))
 	response = executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)

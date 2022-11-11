@@ -1,94 +1,67 @@
-// model.go
-
 package main
 
 import (
+	// "time"
 	"database/sql"
-    // tom: errors is removed once functions are implemented
-	// "errors"
 )
 
-
-// tom: add backticks to json
-type product struct {
-	ID    int     `json:"id"`
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
+type wallet struct {
+	ID    int     `json:"user_id"`
+	Balance float64  `json:"ruble_balance"`
 }
 
-// tom: these are initial empty definitions
-// func (p *product) getProduct(db *sql.DB) error {
-//   return errors.New("Not implemented")
+// для бухгалтерии
+// type reservation struct {
+// 	ID int
+// 	UserID int
+// 	ServiceID int
+// 	Cost int
+// 	Reservation_Time time.Time
 // }
 
-// func (p *product) updateProduct(db *sql.DB) error {
-//   return errors.New("Not implemented")
-// }
-
-// func (p *product) deleteProduct(db *sql.DB) error {
-//   return errors.New("Not implemented")
-// }
-
-// func (p *product) createProduct(db *sql.DB) error {
-//   return errors.New("Not implemented")
-// }
-
-// func getProducts(db *sql.DB, start, count int) ([]product, error) {
-//   return nil, errors.New("Not implemented")
-// }
-
-// tom: these are added after tdd tests
-func (p *product) getProduct(db *sql.DB) error {
-	return db.QueryRow("SELECT name, price FROM products WHERE id=$1",
-		p.ID).Scan(&p.Name, &p.Price)
+type Service struct {
+	ID int
+	Name string
 }
 
-func (p *product) updateProduct(db *sql.DB) error {
+type reserveQuery struct {
+	userId int `json:"userId"`
+	serviceId int `json:"serviceId"`
+	orderId int `json:"orderId"`
+	cost float64 `json:"cost"`
+}
+
+// для бухгалтерии
+// type StatementElem struct {
+// 	RecordTime   time.Time       `json:"recordTime"`
+// 	TransferType string          `json:"transferType"`
+// 	Amount       decimal.Decimal `json:"amount"`
+// 	Description  string          `json:"description"`
+// }
+
+// получение баланса
+func (w *wallet) getWallet(db *sql.DB) error {
+	return db.QueryRow("SELECT ruble_balance FROM balance WHERE id=$1",
+		w.ID).Scan(&w.Balance)
+}
+
+// обновление баланса
+func (w *wallet) updateBalance(db *sql.DB) error {
 	_, err :=
-		db.Exec("UPDATE products SET name=$1, price=$2 WHERE id=$3",
-			p.Name, p.Price, p.ID)
-
+		db.Exec("INSERT INTO balance(ruble_balance) VALUES($1) ON DUPLICATE KEY UPDATE balance SET ruble_balance= ruble_balance + $1 WHERE id=$2",
+				w.Balance, w.ID)
 	return err
 }
 
-func (p *product) deleteProduct(db *sql.DB) error {
-	_, err := db.Exec("DELETE FROM products WHERE id=$1", p.ID)
-
+func (rq *reserveQuery) makeReservation(db * sql.DB) error {
+	_, err := db.Exec(`INSERT INTO reservations(reservation_id, user_id, service_id, cost) 
+						VALUES ($1, $2, $3, $4)`, rq.orderId, rq.userId, rq.serviceId, rq.cost)
 	return err
 }
 
-func (p *product) createProduct(db *sql.DB) error {
-	err := db.QueryRow(
-		"INSERT INTO products(name, price) VALUES($1, $2) RETURNING id",
-		p.Name, p.Price).Scan(&p.ID)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func getProducts(db *sql.DB, start, count int) ([]product, error) {
-	rows, err := db.Query(
-		"SELECT id, name,  price FROM products LIMIT $1 OFFSET $2",
-		count, start)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	products := []product{}
-
-	for rows.Next() {
-		var p product
-		if err := rows.Scan(&p.ID, &p.Name, &p.Price); err != nil {
-			return nil, err
-		}
-		products = append(products, p)
-	}
-
-	return products, nil
+func (rq *reserveQuery) confirmReservation(db * sql.DB) error {
+	_, err := db.Exec(`UPDATE balance SET ruble_balance = ruble_balance - $1 WHERE id = $2;
+					   DELETE FROM reservations WHERE reservation_id = $3`,
+					   rq.cost, rq.userId, rq.orderId)  
+	return err;
 }

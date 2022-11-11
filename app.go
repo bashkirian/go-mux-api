@@ -4,20 +4,14 @@ package main
 
 import (
 	"database/sql"
+	"log"
 
-    // tom: for Initialize
-    "fmt"
-    "log"
+	"encoding/json"
+	"net/http"
+	"strconv"
 
-    // tom: for route handlers
-    "net/http"
-    "encoding/json"
-    "strconv"
-
-    // tom: go get required
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-
 )
 
 type App struct {
@@ -25,153 +19,134 @@ type App struct {
 	DB     *sql.DB
 }
 
-// tom: initial function is empty, it's filled afterwards
-// func (a *App) Initialize(user, password, dbname string) { }
-
-// tom: added "sslmode=disable" to connection string
 func (a *App) Initialize(user, password, dbname string) {
-	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
+	//connectionString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
 
 	var err error
-	a.DB, err = sql.Open("postgres", connectionString)
+	a.DB, err = sql.Open("postgres", "postgres://postgres:123@localhost/products?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	a.Router = mux.NewRouter()
 
-    // tom: this line is added after initializeRoutes is created later on
-    a.initializeRoutes()
+	a.initializeRoutes()
 }
 
-// tom: initial version
-// func (a *App) Run(addr string) { }
-// improved version
 func (a *App) Run(addr string) {
 	log.Fatal(http.ListenAndServe(":8010", a.Router))
 }
 
-// tom: these are added later
-func (a *App) getProduct(w http.ResponseWriter, r *http.Request) {
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	respondWithJSON(w, code, map[string]string{"error": message})
+}
+	
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+// показать баланс, OK
+func (a *App) showBalance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid product ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid User ID")
 		return
 	}
 
-	p := product{ID: id}
-	if err := p.getProduct(a.DB); err != nil {
+	wal := wallet{ID: id}
+	if err := wal.getWallet(a.DB); err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			respondWithError(w, http.StatusNotFound, "Product not found")
+			respondWithError(w, http.StatusNotFound, "User not found")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, p)
+	respondWithJSON(w, http.StatusOK, wal)
 }
+// 	a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
+// 	a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
+// 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")
+// 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
+// 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
+// }
 
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJSON(w, code, map[string]string{"error": message})
-}
-
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(payload)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
-}
-
-
-func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
-	count, _ := strconv.Atoi(r.FormValue("count"))
-	start, _ := strconv.Atoi(r.FormValue("start"))
-
-	if count > 10 || count < 1 {
-		count = 10
-	}
-	if start < 0 {
-		start = 0
-	}
-
-	products, err := getProducts(a.DB, start, count)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, products)
-}
-
-func (a *App) createProduct(w http.ResponseWriter, r *http.Request) {
-	var p product
+// резервация рублей
+func (a *App) reserveRubles(w http.ResponseWriter, r *http.Request) {
+	var res_q reserveQuery
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&p); err != nil {
+	if err := decoder.Decode(&res_q); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 	defer r.Body.Close()
 
-	if err := p.createProduct(a.DB); err != nil {
+	if err := res_q.makeReservation(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, p)
+	respondWithJSON(w, http.StatusOK, res_q)
 }
 
-func (a *App) updateProduct(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid product ID")
+// подтверждение резервации
+func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
+	var res_q reserveQuery
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&res_q); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	if err := res_q.confirmReservation(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	var p product
+	respondWithJSON(w, http.StatusOK, res_q)
+}
+
+// пополнение баланса OK
+func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	var wal wallet
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&p); err != nil {
+	if err := decoder.Decode(&wal); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid resquest payload")
 		return
 	}
 	defer r.Body.Close()
-	p.ID = id
+	wal.ID = id
 
-	if err := p.updateProduct(a.DB); err != nil {
+	if err := wal.updateBalance(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, p)
+	respondWithJSON(w, http.StatusOK, wal)
 }
-
-func (a *App) deleteProduct(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Product ID")
-		return
-	}
-
-	p := product{ID: id}
-	if err := p.deleteProduct(a.DB); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
-}
-
 
 func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
-	a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
-	a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")
-	a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
-	a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
+
+	// основные запросы
+	a.Router.HandleFunc("/reservation", a.reserveRubles).Methods("POST")
+	a.Router.HandleFunc("/balance/deposit", a.depositRubles).Methods("PUT")
+	a.Router.HandleFunc("/reservation/accept", a.reserveAccept).Methods("PUT")
+	a.Router.HandleFunc("/balance/show", a.showBalance).Methods("GET")
+	
+	// дополнительные запросы
 }
