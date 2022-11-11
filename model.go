@@ -48,19 +48,22 @@ func (w *wallet) getWallet(db *sql.DB) error {
 // обновление баланса
 func (w *wallet) updateBalance(db *sql.DB) error {
 	_, err :=
-		db.Exec("INSERT INTO balance(ruble_balance) VALUES($1) ON DUPLICATE KEY UPDATE balance SET ruble_balance= ruble_balance + $1 WHERE id=$2",
+		db.Exec(`INSERT INTO balance(user_id, ruble_balance) VALUES($2, $1) 
+				ON CONFLICT(user_id) DO UPDATE 
+					SET ruble_balance = balance.ruble_balance + $1;`,
 				w.Balance, w.ID)
 	return err
 }
 
+// создание резервации
 func (rq *reserveQuery) makeReservation(db * sql.DB) error {
-	_, err := db.Exec(`INSERT INTO reservations(reservation_id, user_id, service_id, cost) 
-						VALUES ($1, $2, $3, $4)`, rq.orderId, rq.userId, rq.serviceId, rq.cost)
+	_, err := db.Exec(`INSERT INTO reservations VALUES ($1, $2, $3, $4)`, rq.orderId, rq.userId, rq.serviceId, rq.cost)
 	return err
 }
 
+// подтверждение резервации при наличии средств
 func (rq *reserveQuery) confirmReservation(db * sql.DB) error {
-	_, err := db.Exec(`UPDATE balance SET ruble_balance = ruble_balance - $1 WHERE id = $2;
+	_, err := db.Exec(`UPDATE balance SET ruble_balance = balance.ruble_balance - $1 WHERE user_id = $2;
 					   DELETE FROM reservations WHERE reservation_id = $3`,
 					   rq.cost, rq.userId, rq.orderId)  
 	return err;

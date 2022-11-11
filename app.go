@@ -23,7 +23,7 @@ func (a *App) Initialize(user, password, dbname string) {
 	//connectionString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
 
 	var err error
-	a.DB, err = sql.Open("postgres", "postgres://postgres:123@localhost/products?sslmode=disable")
+	a.DB, err = sql.Open("postgres", "postgres://postgres:123@localhost/service?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,31 +97,25 @@ func (a *App) reserveRubles(w http.ResponseWriter, r *http.Request) {
 }
 
 // подтверждение резервации
-func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
-	var res_q reserveQuery
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&res_q); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	defer r.Body.Close()
+// func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
+// 	var res_q reserveQuery
+// 	decoder := json.NewDecoder(r.Body)
+// 	if err := decoder.Decode(&res_q); err != nil {
+// 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+// 		return
+// 	}
+// 	defer r.Body.Close()
 
-	if err := res_q.confirmReservation(a.DB); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+// 	if err := res_q.confirmReservation(a.DB); err != nil {
+// 		respondWithError(w, http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-	respondWithJSON(w, http.StatusOK, res_q)
-}
+// 	respondWithJSON(w, http.StatusOK, res_q)
+// }
 
 // пополнение баланса OK
 func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid user ID")
-		return
-	}
 
 	var wal wallet
 	decoder := json.NewDecoder(r.Body)
@@ -130,7 +124,6 @@ func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	wal.ID = id
 
 	if err := wal.updateBalance(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -145,8 +138,8 @@ func (a *App) initializeRoutes() {
 	// основные запросы
 	a.Router.HandleFunc("/reservation", a.reserveRubles).Methods("POST")
 	a.Router.HandleFunc("/balance/deposit", a.depositRubles).Methods("PUT")
-	a.Router.HandleFunc("/reservation/accept", a.reserveAccept).Methods("PUT")
-	a.Router.HandleFunc("/balance/show", a.showBalance).Methods("GET")
+	// a.Router.HandleFunc("/reservation/accept", a.reserveAccept).Methods("PUT")
+	a.Router.HandleFunc("/balance/show/{id:[0-9]+}", a.showBalance).Methods("GET")
 	
 	// дополнительные запросы
 }
