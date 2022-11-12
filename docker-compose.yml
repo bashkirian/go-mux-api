@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  balancer:
+    container_name: balancer
+    build: .
+    ports: 
+      - 8010:8010 
+    restart: on-failure
+    depends_on:
+      - balance-postgres
+
+  balance-db:
+    container_name: balance_db
+    build: .
+    environment:
+      - POSTGRES_USER=${DB_USER}  
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - '5432:5432'
+    volumes:
+      - database_postgres:/var/lib/postgresql/data
+
+volumes:
+  database_postgres:

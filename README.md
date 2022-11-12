@@ -1,31 +1,8 @@
-# Golang Mux Demo
+# Тестовое задание Авито Бэкенд
 
-[![Build Status](https://tomfern.semaphoreci.com/badges/go-mux-api/branches/master.svg)](https://tomfern.semaphoreci.com/projects/go-mux-api)
+## Запуск программы
 
-Read the complete post with the explanation here:
-
-https://semaphoreci.com/community/tutorials/building-and-testing-a-rest-api-in-go-with-gorilla-mux-and-postgresql
-
-## Run locally
-
-- Start postgres
-- Prepare environment, fill DB parameters:
-
-``` bash
-$ source env-sample
-```
-
-- Build and run:
-
-```bash
-$ export GO111MODULE=on
-$ export GOFLAGS=-mod=vendor
-$ go mod download
-$ go build -o go-mux-api.bin
-$ ./go-mux-api.bin
-```
-
-Server is listening on localhost:8010
+Сервер запускается по URL localhost:8010
 
 ## Test
 
