@@ -25,10 +25,10 @@ type Service struct {
 }
 
 type reserveQuery struct {
-	userId int `json:"userId"`
-	serviceId int `json:"serviceId"`
-	orderId int `json:"orderId"`
-	cost float64 `json:"cost"`
+	OrderId int `json:"orderId"`
+	UserId int `json:"userId"`
+	ServiceId int `json:"serviceId"`
+	Cost float64 `json:"cost"`
 }
 
 // для бухгалтерии
@@ -41,7 +41,7 @@ type reserveQuery struct {
 
 // получение баланса
 func (w *wallet) getWallet(db *sql.DB) error {
-	return db.QueryRow("SELECT ruble_balance FROM balance WHERE id=$1",
+	return db.QueryRow("SELECT ruble_balance FROM balance WHERE user_id=$1",
 		w.ID).Scan(&w.Balance)
 }
 
@@ -57,14 +57,20 @@ func (w *wallet) updateBalance(db *sql.DB) error {
 
 // создание резервации
 func (rq *reserveQuery) makeReservation(db * sql.DB) error {
-	_, err := db.Exec(`INSERT INTO reservations VALUES ($1, $2, $3, $4)`, rq.orderId, rq.userId, rq.serviceId, rq.cost)
+	_, err := db.Exec(`INSERT INTO reservations VALUES ($1, $2, $3, $4)`, rq.OrderId, rq.UserId, rq.ServiceId, rq.Cost)
 	return err
 }
 
 // подтверждение резервации при наличии средств
 func (rq *reserveQuery) confirmReservation(db * sql.DB) error {
-	_, err := db.Exec(`UPDATE balance SET ruble_balance = balance.ruble_balance - $1 WHERE user_id = $2;
-					   DELETE FROM reservations WHERE reservation_id = $3`,
-					   rq.cost, rq.userId, rq.orderId)  
-	return err;
+	// _, err2 := db.Exec(`DELETE FROM reservations WHERE reservation_id = $1 AND service_id = $2`, 
+	// 					rq.OrderId, rq.ServiceId)
+	err2 := db.QueryRow(`SELECT cost FROM reservations r WHERE r.reservation_id = $1 AND r.service_id = $2 AND r.cost = $3;`, 
+					    rq.OrderId, rq.ServiceId, rq.Cost).Scan(&rq.Cost)
+	if err2 != nil {
+		return err2;
+	}
+	_, err1 := db.Exec(`UPDATE balance SET ruble_balance = balance.ruble_balance - $1 WHERE user_id = $2`,
+					   rq.Cost, rq.UserId)  
+    return err1;
 }

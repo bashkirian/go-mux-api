@@ -40,10 +40,10 @@ func (a *App) Run(addr string) {
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	respondWithJSON(w, code, map[string]string{"error": message})
 }
-	
+
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
@@ -71,6 +71,7 @@ func (a *App) showBalance(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, wal)
 }
+
 // 	a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
 // 	a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
 // 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")
@@ -97,24 +98,24 @@ func (a *App) reserveRubles(w http.ResponseWriter, r *http.Request) {
 }
 
 // подтверждение резервации
-// func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
-// 	var res_q reserveQuery
-// 	decoder := json.NewDecoder(r.Body)
-// 	if err := decoder.Decode(&res_q); err != nil {
-// 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-// 		return
-// 	}
-// 	defer r.Body.Close()
+func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
+	var res_q reserveQuery
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&res_q); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
 
-// 	if err := res_q.confirmReservation(a.DB); err != nil {
-// 		respondWithError(w, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
+	if err := res_q.confirmReservation(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-// 	respondWithJSON(w, http.StatusOK, res_q)
-// }
+	respondWithJSON(w, http.StatusOK, res_q)
+}
 
-// пополнение баланса OK
+// пополнение баланса
 func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
 
 	var wal wallet
@@ -134,12 +135,11 @@ func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) initializeRoutes() {
-
+	// документация TODO
 	// основные запросы
 	a.Router.HandleFunc("/reservation", a.reserveRubles).Methods("POST")
 	a.Router.HandleFunc("/balance/deposit", a.depositRubles).Methods("PUT")
-	// a.Router.HandleFunc("/reservation/accept", a.reserveAccept).Methods("PUT")
+	a.Router.HandleFunc("/reservation/accept", a.reserveAccept).Methods("PUT")
 	a.Router.HandleFunc("/balance/show/{id:[0-9]+}", a.showBalance).Methods("GET")
-	
 	// дополнительные запросы
 }
