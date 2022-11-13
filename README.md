@@ -46,16 +46,39 @@ $ go test -v
 PASS
 ok      _/home/tom/r/go-mux-api 0.034s
 ```
-## Запросы
+## Обязательные запросы
 
 ### /balance/deposit
 
 Принимает на вход json с ID пользователя и количеством зачисляемых средств. Возвращает то же самое. Если кошелька еще не существует, создает новый с заданной суммой.  
 
-https://github.com/bashkirian/go-mux-api/tree/internship/db/схема_дб.jpq
+https://github.com/bashkirian/go-mux-api/tree/internship/requests/создание_кошелька.jpq
+
+### /balance/show/:id
+
+Показывает баланс пользователя. Если пользователя не существует, выбрасывает ошибку 404. Иначе, возвращает кошелек пользователя.  
+
+https://github.com/bashkirian/go-mux-api/tree/internship/requests/нет_кошелька.jpq  
+
+### /reservation
+
+Создает резервацию с указанными параметрами. Если пользователя/резервации с таким ID не существует или же резервация уже существует, выбрасывает ошибку 500.
+
+https://github.com/bashkirian/go-mux-api/tree/internship/requests/повторяющаяся_резервация.jpq  
+
+https://github.com/bashkirian/go-mux-api/tree/internship/requests/создание_резервации.jpq  
+
+### /reservation/accept
+
+Принимает резервацию с указанными параметрами. Если пользователя/резервации с таким ID не существует или же резервация уже существует, выбрасывает ошибку 500.
+Если баланс после принятия станет отрицательным, тоже будет ошибка 500.
+
+https://github.com/bashkirian/go-mux-api/tree/internship/requests/отрицательный_баланс.jpq  
+
+https://github.com/bashkirian/go-mux-api/tree/internship/requests/успешная_резервация.jpq  
 
 ## License
 
-Copyright (c) 2021 Rendered Text
+Copyright (c) 2022 Rendered Text
 
 Distributed under the MIT License. See the file LICENSE.
