@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -20,10 +21,15 @@ type App struct {
 }
 
 func (a *App) Initialize(user, password, dbname string) {
-	//connectionString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
+	connectionString := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+		"postgres",
+		"123",
+		"balance-db",
+		"5432",
+		"service")
 
 	var err error
-	a.DB, err = sql.Open("postgres", "postgres://postgres:123@fullstack-postgres:5432/service?sslmode=disable")
+	a.DB, err = sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+
+	"github.com/TomFern/go-mux-api"
 )
 
 var a main.App

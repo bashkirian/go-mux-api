@@ -57,13 +57,13 @@ ALTER TABLE public.reservations OWNER TO postgres;
 -- Name: services; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.services (
-    service_id integer NOT NULL,
-    service_name character varying(255) NOT NULL
-);
+-- CREATE TABLE public.services (
+--     service_id integer NOT NULL,
+--     service_name character varying(255) NOT NULL
+-- );
 
 
-ALTER TABLE public.services OWNER TO postgres;
+-- ALTER TABLE public.services OWNER TO postgres;
 
 --
 -- TOC entry 210 (class 1259 OID 57352)
@@ -104,8 +104,8 @@ ALTER TABLE ONLY public.reservations
 -- Name: services services_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.services
-    ADD CONSTRAINT services_pk PRIMARY KEY (service_id);
+--ALTER TABLE ONLY public.services
+--    ADD CONSTRAINT services_pk PRIMARY KEY (service_id);
 
 
 --
@@ -131,8 +131,8 @@ ALTER TABLE ONLY public.reservations
 -- Name: reservations reservations_fk1; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.reservations
-    ADD CONSTRAINT reservations_fk1 FOREIGN KEY (service_id) REFERENCES public.services(service_id);
+--ALTER TABLE ONLY public.reservations
+    --ADD CONSTRAINT reservations_fk1 FOREIGN KEY (service_id) REFERENCES public.services(service_id);
 
 
 --
@@ -149,8 +149,8 @@ ALTER TABLE ONLY public.transactions
 -- Name: transactions transactions_fk1; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.transactions
-    ADD CONSTRAINT transactions_fk1 FOREIGN KEY (service_id) REFERENCES public.services(service_id);
+--ALTER TABLE ONLY public.transactions
+   -- ADD CONSTRAINT transactions_fk1 FOREIGN KEY (service_id) REFERENCES public.services(service_id);
 
 
 -- Completed on 2022-11-12 19:36:48
