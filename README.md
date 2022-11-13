@@ -52,30 +52,30 @@ ok      _/home/tom/r/go-mux-api 0.034s
 
 Принимает на вход json с ID пользователя и количеством зачисляемых средств. Возвращает то же самое. Если кошелька еще не существует, создает новый с заданной суммой.  
 
-![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/создание_кошелька.jpq)
+![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/wallet_create.jpq)
 
 ### /balance/show/:id
 
 Показывает баланс пользователя. Если пользователя не существует, выбрасывает ошибку 404. Иначе, возвращает кошелек пользователя.  
 
-![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/нет_кошелька.jpq)  
+![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/no_wallet.jpq)  
 
 ### /reservation
 
 Создает резервацию с указанными параметрами. Если пользователя/резервации с таким ID не существует или же резервация уже существует, выбрасывает ошибку 500.
 
-![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/повторяющаяся_резервация.jpq)
+![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/reservation_exists.jpq)
 
-![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/создание_резервации.jpq)  
+![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/reservation_creation.jpq)  
 
 ### /reservation/accept
 
 Принимает резервацию с указанными параметрами. Если пользователя/резервации с таким ID не существует или же резервация уже существует, выбрасывает ошибку 500.
 Если баланс после принятия станет отрицательным, тоже будет ошибка 500.
 
-![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/отрицательный_баланс.jpq) 
+![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/negative_balance.jpq) 
 
-![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/успешная_резервация.jpq)  
+![image](https://github.com/bashkirian/go-mux-api/tree/internship/requests/correct_reservation.jpq)  
 
 ## License
 
