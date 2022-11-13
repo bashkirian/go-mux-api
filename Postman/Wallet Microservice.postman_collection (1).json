@@ -1,0 +1,172 @@
+{
+	"info": {
+		"_postman_id": "20058850-a5a3-441c-bf18-e4c61a96e636",
+		"name": "Wallet Microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23757885"
+	},
+	"item": [
+		{
+			"name": "Обязательные запросы",
+			"item": [
+				{
+					"name": "Получение баланса",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\" : 20,\r\n    \"ruble_balance\" : 10.0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/balance/show/20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"balance",
+								"show",
+								"20"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Резервирование средств",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"reservation_id\" : 10,\r\n    \"user_id\" : 11,\r\n    \"service_id\" : 1,\r\n    \"cost\" : 100.10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/reservation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reservation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Признание выручки",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orderId\" : 1,\r\n    \"userId\" : 1,\r\n    \"serviceId\" : 1,\r\n    \"cost\" : 200.0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/reservation/accept",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reservation",
+								"accept"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Начисление средств",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\" : 10,\r\n    \"ruble_balance\" : 20\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/balance/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"balance",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Дополнительные запросы",
+			"item": [
+				{
+					"name": "Получение месячного отчета",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/month",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"month"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка транзакций",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/transactions/20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transactions",
+								"20"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "localhost:8010"
+		}
+	]
+}

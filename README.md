@@ -2,24 +2,32 @@
 
 ## Запуск программы
 
-Сервер запускается по URL localhost:8010
+### Порт
 
+Используется порт 8010
+
+### Неподсредственно запуск
+```ShellSession
+docker-compose up
+```
+## Коллекции запросов
+
+Коллекции запросов для REST можно импортировать [отсюда](https://github.com/bashkirian/go-mux-api/tree/internship/Postman)
 ## Test
 
+Пока тесты можно прогнать локально, планируется сделать прогон через Docker.
 ```bash
 $ go test -v
 === RUN   TestEmptyTable
 --- PASS: TestEmptyTable (0.00s)
-=== RUN   TestGetNonExistentProduct
---- PASS: TestGetNonExistentProduct (0.00s)
-=== RUN   TestCreateProduct
---- PASS: TestCreateProduct (0.00s)
-=== RUN   TestGetProduct
---- PASS: TestGetProduct (0.00s)
-=== RUN   TestUpdateProduct
---- PASS: TestUpdateProduct (0.01s)
-=== RUN   TestDeleteProduct
---- PASS: TestDeleteProduct (0.01s)
+=== RUN   TestGetNonExistentUser
+--- PASS: TestGetNonExistentUser (0.00s)
+=== RUN   TestCreateWallet
+--- PASS: TestCreateWallet (0.00s)
+=== RUN   TestGetWallet
+--- PASS: TestGetWallet (0.00s)
+=== RUN   TestUpdateBalance
+--- PASS: TestUpdateBalance (0.01s)
 PASS
 ok      _/home/tom/r/go-mux-api 0.034s
 ```

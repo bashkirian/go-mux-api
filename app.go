@@ -23,7 +23,7 @@ func (a *App) Initialize(user, password, dbname string) {
 	//connectionString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
 
 	var err error
-	a.DB, err = sql.Open("postgres", "postgres://postgres:123@localhost/service?sslmode=disable")
+	a.DB, err = sql.Open("postgres", "postgres://postgres:123@fullstack-postgres:5432/service?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
