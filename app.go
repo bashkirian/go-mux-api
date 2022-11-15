@@ -5,7 +5,7 @@ package main
 import (
 	"database/sql"
 	"log"
-
+	"os"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -24,8 +24,8 @@ func (a *App) Initialize(user, password, dbname string) {
 	connectionString := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		"postgres",
 		"123",
-		"balance-db",
-		"5432",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
 		"service")
 
 	var err error
@@ -84,6 +84,34 @@ func (a *App) showBalance(w http.ResponseWriter, r *http.Request) {
 // 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
 // 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
 // }
+// пополнение баланса
+func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
+
+	var wal wallet
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&wal); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid resquest payload")
+		return
+	}
+	defer r.Body.Close()
+
+	if wal.Balance <= 0 {
+		respondWithError(w, http.StatusBadRequest, "Negative deposit")
+		return
+	}
+
+	if err := wal.updateBalance(a.DB); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "User not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, wal)
+}
 
 // резервация рублей
 func (a *App) reserveRubles(w http.ResponseWriter, r *http.Request) {
@@ -119,25 +147,6 @@ func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, res_q)
-}
-
-// пополнение баланса
-func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
-
-	var wal wallet
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&wal); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid resquest payload")
-		return
-	}
-	defer r.Body.Close()
-
-	if err := wal.updateBalance(a.DB); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, wal)
 }
 
 func (a *App) initializeRoutes() {

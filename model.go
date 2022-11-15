@@ -47,13 +47,23 @@ func (w *wallet) getWallet(db *sql.DB) error {
 
 // обновление баланса
 func (w *wallet) updateBalance(db *sql.DB) error {
-	_, err :=
-		db.Exec(`INSERT INTO balance(user_id, ruble_balance) VALUES($2, $1) 
+	return db.QueryRow(`INSERT INTO balance(user_id, ruble_balance) VALUES($2, $1) 
 				ON CONFLICT(user_id) DO UPDATE 
-					SET ruble_balance = balance.ruble_balance + $1;`,
-				w.Balance, w.ID)
-	return err
+					SET ruble_balance = balance.ruble_balance + $1
+					RETURNING user_id, ruble_balance`,
+				w.Balance, w.ID).Scan(&w.ID, &w.Balance)
 }
+
+// // обновление баланса
+// func (w *wallet) updateBalance(db *sql.DB) error {
+// 	_, err :=
+// 		db.Exec(`INSERT INTO balance(user_id, ruble_balance) VALUES($2, $1) 
+// 				ON CONFLICT(user_id) DO UPDATE 
+// 					SET ruble_balance = balance.ruble_balance + $1
+// 					RETURNING ruble_balance`,
+// 				w.Balance, w.ID)
+// 	return err
+// }
 
 // создание резервации
 func (rq *reserveQuery) makeReservation(db * sql.DB) error {
