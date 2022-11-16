@@ -54,17 +54,6 @@ func (w *wallet) updateBalance(db *sql.DB) error {
 				w.Balance, w.ID).Scan(&w.ID, &w.Balance)
 }
 
-// // обновление баланса
-// func (w *wallet) updateBalance(db *sql.DB) error {
-// 	_, err :=
-// 		db.Exec(`INSERT INTO balance(user_id, ruble_balance) VALUES($2, $1) 
-// 				ON CONFLICT(user_id) DO UPDATE 
-// 					SET ruble_balance = balance.ruble_balance + $1
-// 					RETURNING ruble_balance`,
-// 				w.Balance, w.ID)
-// 	return err
-// }
-
 // создание резервации
 func (rq *reserveQuery) makeReservation(db * sql.DB) error {
 	_, err := db.Exec(`INSERT INTO reservations VALUES ($1, $2, $3, $4)`, rq.OrderId, rq.UserId, rq.ServiceId, rq.Cost)
@@ -73,8 +62,6 @@ func (rq *reserveQuery) makeReservation(db * sql.DB) error {
 
 // подтверждение резервации при наличии средств
 func (rq *reserveQuery) confirmReservation(db * sql.DB) error {
-	// _, err2 := db.Exec(`DELETE FROM reservations WHERE reservation_id = $1 AND service_id = $2`, 
-	// 					rq.OrderId, rq.ServiceId)
 	err2 := db.QueryRow(`SELECT cost FROM reservations r WHERE r.reservation_id = $1 AND r.service_id = $2 AND r.cost = $3;`, 
 					    rq.OrderId, rq.ServiceId, rq.Cost).Scan(&rq.Cost)
 	if err2 != nil {

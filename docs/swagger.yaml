@@ -1,0 +1,24 @@
+basePath: /
+host: localhost:8010 for local, balance-db:8010 for docker
+info:
+  contact: {}
+  description: Balance service task made for Avito internship
+  title: Balance microservice
+  version: "1.0"
+paths:
+  /balance/show:
+    get:
+      description: Show balance of user if id is correct
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+      summary: Show balance
+      tags:
+      - balance
+swagger: "2.0"

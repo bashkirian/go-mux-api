@@ -3,6 +3,7 @@
 package main
 
 import (
+	//"errors"
 	"database/sql"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/swaggo/http-swagger"
 )
 
 type App struct {
@@ -55,7 +57,13 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(response)
 }
 
-// показать баланс, OK
+// @Summary Show balance
+// @Tags balance
+// @Description Show balance of user if id is correct
+// @Produce json
+// @Success 204 {integer} integer
+// @Failure 400 
+// @Router /balance/show [GET]
 func (a *App) showBalance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -150,7 +158,8 @@ func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) initializeRoutes() {
-	// документация TODO
+	// документация 
+	a.Router.PathPrefix("/swagger/").Handler(httpSwagger.Handler(httpSwagger.URL("http://localhost:8010/swagger/doc.json"),)).Methods(http.MethodGet)
 	// основные запросы
 	a.Router.HandleFunc("/reservation", a.reserveRubles).Methods("POST")
 	a.Router.HandleFunc("/balance/deposit", a.depositRubles).Methods("PUT")

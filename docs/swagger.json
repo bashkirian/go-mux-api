@@ -1,0 +1,36 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Balance service task made for Avito internship",
+        "title": "Balance microservice",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8010 for local, balance-db:8010 for docker",
+    "basePath": "/",
+    "paths": {
+        "/balance/show": {
+            "get": {
+                "description": "Show balance of user if id is correct",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "balance"
+                ],
+                "summary": "Show balance",
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        }
+    }
+}
