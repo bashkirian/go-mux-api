@@ -6,7 +6,23 @@ info:
   title: Balance microservice
   version: "1.0"
 paths:
-  /balance/show:
+  /balance/deposit:
+    put:
+      description: Increase balance of user_id if it exists & value of increment is
+        positive
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+      summary: Increase balance
+      tags:
+      - Balance
+  /balance/show/:id:
     get:
       description: Show balance of user if id is correct
       produces:
@@ -20,5 +36,36 @@ paths:
           description: Bad Request
       summary: Show balance
       tags:
-      - balance
+      - Balance
+  /reservation:
+    post:
+      description: Reserve order if it doesn't exist
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+      summary: Reserve order
+      tags:
+      - Reservations
+  /reservation/accept:
+    put:
+      description: Decrease balance of user, if reservation with given parameters
+        exists
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+      summary: Accept reservation
+      tags:
+      - Reservations
 swagger: "2.0"

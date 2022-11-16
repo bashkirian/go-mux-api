@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/swaggo/http-swagger"
+	_ "github.com/bashkirian/go-mux-api/tree/internship/docs"
 )
 
 type App struct {
@@ -58,12 +59,12 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 // @Summary Show balance
-// @Tags balance
+// @Tags Balance
 // @Description Show balance of user if id is correct
 // @Produce json
 // @Success 204 {integer} integer
 // @Failure 400 
-// @Router /balance/show [GET]
+// @Router /balance/show/:id [GET]
 func (a *App) showBalance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -86,13 +87,13 @@ func (a *App) showBalance(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, wal)
 }
 
-// 	a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
-// 	a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
-// 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")
-// 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
-// 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
-// }
-// пополнение баланса
+// @Summary Increase balance
+// @Tags Balance
+// @Description Increase balance of user_id if it exists & value of increment is positive
+// @Produce json
+// @Success 204 {integer} integer
+// @Failure 400 
+// @Router /balance/deposit [PUT]
 func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
 
 	var wal wallet
@@ -121,7 +122,13 @@ func (a *App) depositRubles(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, wal)
 }
 
-// резервация рублей
+// @Summary Reserve order
+// @Tags Reservations
+// @Description Reserve order if it doesn't exist
+// @Produce json
+// @Success 204 {integer} integer
+// @Failure 400 
+// @Router /reservation [POST]
 func (a *App) reserveRubles(w http.ResponseWriter, r *http.Request) {
 	var res_q reserveQuery
 	decoder := json.NewDecoder(r.Body)
@@ -139,7 +146,13 @@ func (a *App) reserveRubles(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, res_q)
 }
 
-// подтверждение резервации
+// @Summary Accept reservation
+// @Tags Reservations
+// @Description Decrease balance of user, if reservation with given parameters exists
+// @Produce json
+// @Success 204 {integer} integer
+// @Failure 400 
+// @Router /reservation/accept [PUT]
 func (a *App) reserveAccept(w http.ResponseWriter, r *http.Request) {
 	var res_q reserveQuery
 	decoder := json.NewDecoder(r.Body)

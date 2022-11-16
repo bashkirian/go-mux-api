@@ -16,16 +16,85 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/balance/show": {
+        "/balance/deposit": {
+            "put": {
+                "description": "Increase balance of user_id if it exists \u0026 value of increment is positive",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Balance"
+                ],
+                "summary": "Increase balance",
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        },
+        "/balance/show/:id": {
             "get": {
                 "description": "Show balance of user if id is correct",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "balance"
+                    "Balance"
                 ],
                 "summary": "Show balance",
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        },
+        "/reservation": {
+            "post": {
+                "description": "Reserve order if it doesn't exist",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Reserve order",
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        },
+        "/reservation/accept": {
+            "put": {
+                "description": "Decrease balance of user, if reservation with given parameters exists",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Accept reservation",
                 "responses": {
                     "204": {
                         "description": "No Content",

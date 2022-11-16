@@ -57,6 +57,13 @@ $ go test -v
 PASS  
 ok      github.com/TomFern/go-mux-api   0.698s  
 ```
+
+### Получение документации 
+
+## http://localhost:8010/swagger/index.html
+
+![image](https://github.com/bashkirian/go-mux-api/blob/internship/requests/documentation.jpg)
+
 ## Обязательные запросы
 
 ### /balance/deposit

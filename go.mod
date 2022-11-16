@@ -1,4 +1,4 @@
-module github.com/TomFern/go-mux-api
+module github.com/bashkirian/go-mux-api/tree/internship
 
 go 1.16
 
